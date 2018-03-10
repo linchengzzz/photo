@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .box {
+            width: 350px;
+            height: 460px;
+            background-color: #ff0;
+            margin: auto;
+            position: relative;
+        }
+
+        .box .cont {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: #0f0;
+        }
+
+        .box .cont img {
+            width: 100%;
+            height: 100%;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="box" class="box">
+        <div class="cont">
+            <img src="img/1.png" alt="">
+        </div>
+        <div class="cont">
+            <img src="img/2.png" alt="">
+        </div>
+        <div class="cont">
+            <img src="img/3.png" alt="">
+        </div>
+        <div class="cont">
+            <img src="img/4.png" alt="">
+        </div>
+        <div class="cont">
+            <img src="img/5.png" alt="">
+        </div>
+        <div class="cont">
+            <img src="img/6.png" alt="">
+        </div>
+        <div class="cont">
+            <img src="img/7.png" alt="">
+        </div>
+        <div class="cont">
+            <img src="img/8.png" alt="">
+        </div>
+        <div class="cont">
+            <img src="img/9.png" alt="">
+        </div>
+        <div class="cont">
+            <img src="img/10.png" alt="">
+        </div>
+        <div class="cont">
+            <img src="img/11.png" alt="">
+        </div>
+        <div class="cont">
+            <img src="img/12.png" alt="">
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script>
+    var cont = document.getElementsByClassName('cont');
+    var box = document.getElementById('box');
+    //设置定位
+    var setPosition = function () {
+        for (var i = 0; i < cont.length; i++) {
+            var l = i % 3;
+            var t = Math.floor(i / 3);
+            cont[i].style.left = l * 100 + l * 10 + 15 + 'px';
+            cont[i].style.top = t * 100 + t * 10 + 15 + 'px';
+        }
+    }
+    //设置鼠标事件
+    var setMouseEvent = function () {
+        for (var i = 0; i < cont.length; i++) {
+            cont[i].onmousedown = function (event) {
+                //鼠标初始值
+                this['mouseX'] = event.clientX;
+                this['mouseY'] = event.clientY;
+                //元素初始值
+                this['contX'] = parseFloat(this.style.left);
+                this['contY'] = parseFloat(this.style.top);
+                //flag 区别当前元素 与 未移动元素
+                this['flag'] = true;
+                this.style.zIndex = '10';
+                //解决鼠标丢失
+                window.onmousemove = event => move.call(this, event);
+                window.onmouseup = event => up.call(this, event);
+            }
+        }
+    }
+
+    var move = function (event) {
+        //移动后的位置
+        var changeX = event.clientX - this.mouseX;
+        var changeY = event.clientY - this.mouseY;
+        var curX = this.contX + changeX;
+        var curY = this.contY + changeY;
+        //边界
+        var minX = 0;
+        var maxX = box.offsetWidth - this.offsetWidth;
+        var minY = 0;
+        var maxY = box.offsetHeight - this.offsetHeight;
+
+        if (curX <= minX) {
+            this.style.left = minX + 'px';
+        } else if (curX >= maxX) {
+            this.style.left = maxX + 'px';
+        } else {
+            this.style.left = curX + 'px';
+        }
+
+        if (curY <= minY) {
+            this.style.top = minY + 'px';
+        } else if (curY >= maxY) {
+            this.style.top = maxY + 'px';
+        } else {
+            this.style.top = curY + 'px';
+        }
+        //改变颜色
+        changeColor.call(this)
+    }
+
+    var up = function (event) {
+        window.onmousemove = null;
+        window.onmouseup = null;
+        this.style.zIndex = '1';
+        //交互元素
+        sSwitch.call(this);
+    }
+
+    var changeColor = function () {
+        for (var i = 0; i < cont.length; i++) {
+            if (!cont[i].flag) {
+                //根据元素间的距离 改变颜色
+                var distX = Math.abs(parseFloat(this.style.left) - parseFloat(cont[i].style.left));
+                var distY = Math.abs(parseFloat(this.style.top) - parseFloat(cont[i].style.top));
+                if (distX < 100 && distY < 100) {
+                    cont[i].style.backgroundColor = 'pink';
+                } else {
+                    cont[i].style.backgroundColor = '#0f0';
+                }
+            }
+        }
+    }
+
+    var sSwitch = function () {
+
+        var curAry = [];
+        for (var i = 0; i < cont.length; i++) {
+            //排除当前被选中的元素
+            if (cont[i].flag) {
+                curAry[i] = 999999;
+            }
+            //存储当前元素距离其他元素的距离
+            if (!cont[i].flag) {
+                cont[i].style.backgroundColor = '#0f0'
+                var distX = Math.abs(parseFloat(this.style.left) - parseFloat(cont[i].style.left));
+                var distY = Math.abs(parseFloat(this.style.top) - parseFloat(cont[i].style.top));
+                curAry[i] = distX + distY;
+            }
+            cont[i].flag = false;
+        }
+        //找到最小距离的元素,存储 X Y 值
+        var minIndex = curAry.indexOf(Math.min(...curAry));
+        var change = {
+            curX: this.contX + 'px',
+            curY: this.contY + 'px',
+            minX: cont[minIndex].style.left,
+            minY: cont[minIndex].style.top,
+        }
+        var moveX = Math.abs(parseFloat(this.style.left) - this.contX);
+        var moveY = Math.abs(parseFloat(this.style.top) - this.contY);
+        //如果当前元素移动距离小与15 恢复初始位置
+        if (moveX > 15 || moveY > 15) {
+            this.style.left = change.minX;
+            this.style.top = change.minY;
+            cont[minIndex].style.left = change.curX;
+            cont[minIndex].style.top = change.curY;
+        } else {
+            this.style.left = change.curX;
+            this.style.top = change.curY;
+        }
+        change = null;
+    }
+    setPosition();
+    setMouseEvent();
+</script>
